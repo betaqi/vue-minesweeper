@@ -1,9 +1,78 @@
 <script setup lang="ts">
+const WIDTH = 10
+const HEIGHT = 10
 defineOptions({
   name: 'IndexPage',
 })
+
+interface BlockState {
+  x: number
+  y: number
+  mine?: boolean // 炸弹
+  flagged?: boolean // 标记
+  revealed?: boolean // 翻开
+  adjacentMines: number // 相邻的地雷
+}
+
+const state = reactive(
+  Array.from({ length: HEIGHT }, (_, y) =>
+    Array.from({ length: WIDTH }, (_, x): BlockState => ({
+      x, y, adjacentMines: 0,
+    }),
+    ),
+  ),
+)
+function onClick(y: number, x: number) {
+
+}
+
+function makerMines() {
+  for (const row of state) {
+    for (const block of row)
+      block.mine = Math.random() < 0.3
+  }
+}
+
+const directions = [
+  [1, 1],
+  [1, 0],
+  [1, -1],
+  [0, -1],
+  [-1, -1],
+  [-1, 0],
+  [-1, 1],
+  [0, 1],
+]
+
+function updateNums() {
+  state.forEach((row, y) => {
+    row.forEach((block) => {
+      if (block.mine)
+        return
+      for (const [dx, dy] of directions) {
+        const x2 = block.x + dx
+        const y2 = block.y + dy
+        if (x2 < 0 || x2 >= WIDTH || y2 < 0 || y2 >= HEIGHT)
+          continue
+        if (state[y2][x2].mine)
+          block.adjacentMines += 1
+      }
+    })
+  })
+}
+
+makerMines()
+updateNums()
 </script>
 
 <template>
-  <div />
+  <div v-for="(row, y) of state" :key="y">
+    <button
+      v-for="item of row" :key="item.x"
+      w-10 h-10 border hover:bg-gray
+      @click="onClick(y, item.x)"
+    >
+      {{ item.mine ? '💣' : item.adjacentMines }}
+    </button>
+  </div>
 </template>
