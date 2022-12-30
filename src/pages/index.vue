@@ -1,9 +1,10 @@
 <script setup lang="ts">
-const WIDTH = 10
-const HEIGHT = 10
 defineOptions({
   name: 'IndexPage',
 })
+interface DifficultyMap {
+  [key: string]: number
+}
 
 interface BlockState {
   x: number
@@ -14,45 +15,32 @@ interface BlockState {
   adjacentMines: number // 相邻的地雷
 }
 
-const state = reactive(
-  Array.from({ length: HEIGHT }, (_, y) =>
-    Array.from({ length: WIDTH }, (_, x): BlockState => ({
-      x, y, adjacentMines: 0,
-    }),
-    ),
-  ),
-)
-function onClick(y: number, x: number) {
-
-}
-
-function makerMines() {
-  for (const row of state) {
-    for (const block of row)
-      block.mine = Math.random() < 0.3
-  }
+let difficultyLevel = $ref('low')
+const difficultyMap: DifficultyMap = {
+  low: 10,
+  mid: 15,
+  high: 20,
 }
 
 const directions = [
   [1, 1],
   [1, 0],
+  [0, 1],
   [1, -1],
+  [-1, 1],
+  [-1, 0],
   [0, -1],
   [-1, -1],
-  [-1, 0],
-  [-1, 1],
-  [0, 1],
 ]
-
-function updateNums() {
-  state.forEach((row, y) => {
-    row.forEach((block) => {
+function updateNums(state: BlockState[][]) {
+  state.forEach((row: BlockState[]) => {
+    row.forEach((block: BlockState) => {
       if (block.mine)
         return
       for (const [dx, dy] of directions) {
         const x2 = block.x + dx
         const y2 = block.y + dy
-        if (x2 < 0 || x2 >= WIDTH || y2 < 0 || y2 >= HEIGHT)
+        if (x2 < 0 || x2 >= difficultyMap[difficultyLevel] || y2 < 0 || y2 >= difficultyMap[difficultyLevel])
           continue
         if (state[y2][x2].mine)
           block.adjacentMines += 1
@@ -61,18 +49,67 @@ function updateNums() {
   })
 }
 
-makerMines()
-updateNums()
+function makerMines(state: any) {
+  for (const row of state) {
+    for (const block of row)
+      block.mine = Math.random() < 0.3
+  }
+}
+
+const data = computed(
+  () => {
+    const state = Array.from({ length: difficultyMap[difficultyLevel] }, (_, y) =>
+      Array.from({ length: difficultyMap[difficultyLevel] }, (_, x): BlockState => ({
+        x, y, adjacentMines: 0,
+      }),
+      ),
+    )
+    makerMines(state)
+    updateNums(state)
+    return state
+  },
+)
+function onClick(block: BlockState) {
+}
+
+const blockColors = [
+  'text-transparent border-transparent',
+  'text-blue',
+  'text-green',
+  'text-yellow',
+  'text-orange',
+  'text-red',
+  'text-purple',
+  'text-pink',
+]
+function getBlockClass(block: BlockState) {
+  return block.mine ? 'text-red' : blockColors[block.adjacentMines]
+}
+
+const difficulty = ['low', 'mid', 'high']
+
+function changeDifficulty(level: string) {
+  difficultyLevel = level
+}
 </script>
 
 <template>
-  <div v-for="(row, y) of state" :key="y">
+  <button
+    v-for="item of difficulty" :key="item"
+    btn m-3 text-sm mt-8
+    @click="changeDifficulty(item)"
+  >
+    {{ item }}
+  </button>
+  <div v-for="(row, y) of data" :key="y">
     <button
-      v-for="item of row" :key="item.x"
-      w-10 h-10 border hover:bg-gray
-      @click="onClick(y, item.x)"
+      v-for="block of row" :key="block.x"
+      w-10 h-10 hover:bg-gray
+      border="1 gray-400/10"
+      :class="getBlockClass(block)"
+      @click="onClick(block)"
     >
-      {{ item.mine ? '💣' : item.adjacentMines }}
+      {{ block.mine ? '💣' : block.adjacentMines }}
     </button>
   </div>
 </template>
