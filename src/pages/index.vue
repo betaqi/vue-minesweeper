@@ -14,6 +14,20 @@ interface BlockState {
   adjacentMines: number // 相邻的地雷
 }
 
+const blockColors = [
+  'text-transparent',
+  'text-blue',
+  'text-green',
+  'text-yellow',
+  'text-orange',
+  'text-red',
+  'text-purple',
+  'text-pink',
+]
+function getBlockClass(block: BlockState) {
+  return block.mine ? 'text-red' : blockColors[block.adjacentMines]
+}
+
 const state = reactive(
   Array.from({ length: HEIGHT }, (_, y) =>
     Array.from({ length: WIDTH }, (_, x): BlockState => ({
@@ -22,7 +36,7 @@ const state = reactive(
     ),
   ),
 )
-function onClick(y: number, x: number) {
+function onClick(block: BlockState) {
 
 }
 
@@ -68,11 +82,14 @@ updateNums()
 <template>
   <div v-for="(row, y) of state" :key="y">
     <button
-      v-for="item of row" :key="item.x"
-      w-10 h-10 border hover:bg-gray
-      @click="onClick(y, item.x)"
+      v-for="block of row" :key="block.x"
+      w-10 h-10
+      hover="bg-gray/10"
+      border="1 gray-400/10"
+      :class="getBlockClass(block)"
+      @click="onClick(block)"
     >
-      {{ item.mine ? '💣' : item.adjacentMines }}
+      {{ block.mine ? '💣' : block.adjacentMines }}
     </button>
   </div>
 </template>
