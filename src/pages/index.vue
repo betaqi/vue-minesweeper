@@ -10,7 +10,7 @@ interface BlockState {
   y: number
   mine?: boolean // 炸弹
   flagged?: boolean // 标记
-  revealed?: boolean // 翻开
+  revealed: boolean // 翻开
   adjacentMines: number // 相邻的地雷
 }
 
@@ -25,19 +25,25 @@ const blockColors = [
   'text-pink',
 ]
 function getBlockClass(block: BlockState) {
+  if (!block.revealed)
+    return 'bg-gray-600/10'
+
   return block.mine ? 'text-red' : blockColors[block.adjacentMines]
 }
 
 const state = reactive(
   Array.from({ length: HEIGHT }, (_, y) =>
     Array.from({ length: WIDTH }, (_, x): BlockState => ({
-      x, y, adjacentMines: 0,
+      x,
+      y,
+      adjacentMines: 0,
+      revealed: false,
     }),
     ),
   ),
 )
 function onClick(block: BlockState) {
-
+  block.revealed = true
 }
 
 function makerMines() {
@@ -59,7 +65,7 @@ const directions = [
 ]
 
 function updateNums() {
-  state.forEach((row, y) => {
+  state.forEach((row) => {
     row.forEach((block) => {
       if (block.mine)
         return
@@ -80,7 +86,7 @@ updateNums()
 </script>
 
 <template>
-  <div v-for="(row, y) of state" :key="y">
+  <div v-for="(row, y) of state" :key="y" flex="~" justify-center>
     <button
       v-for="block of row" :key="block.x"
       w-10 h-10
@@ -89,7 +95,9 @@ updateNums()
       :class="getBlockClass(block)"
       @click="onClick(block)"
     >
-      {{ block.mine ? '💣' : block.adjacentMines }}
+      <template v-if="block.revealed">
+        {{ block.mine ? '💣' : block.adjacentMines }}
+      </template>
     </button>
   </div>
 </template>
