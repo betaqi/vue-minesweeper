@@ -42,15 +42,74 @@ const state = reactive(
     ),
   ),
 )
+
+let makerMine = false
+
 function onClick(block: BlockState) {
+  if (!makerMine) {
+    makerMines(block)
+    updateNums()
+    makerMine = true
+  }
+
   block.revealed = true
+  revealedBlock(block)
+  if (block.mine)
+    revealedMines()
 }
 
-function makerMines() {
+function makerMines(initial: BlockState) {
   for (const row of state) {
-    for (const block of row)
+    for (const block of row) {
+      if (Math.abs(initial.x - block.x) <= 1)
+        continue
+      if (Math.abs(initial.y - block.y) <= 1)
+        continue
+
+      if (Math.abs(block.y - initial.y) <= 1)
+        continue
+
       block.mine = Math.random() < 0.3
+    }
   }
+}
+
+function updateNums() {
+  state.forEach((row) => {
+    row.forEach((block) => {
+      if (block.mine)
+        return
+      getSiblings(block).forEach((b) => {
+        if (b.mine)
+          block.adjacentMines += 1
+      })
+    })
+  })
+}
+
+function revealedBlock(block: BlockState) {
+  if (block.adjacentMines)
+    return
+  getSiblings(block)
+    .filter(item => !item.adjacentMines)
+    .forEach((b) => {
+      if (!b.revealed) {
+        b.revealed = true
+        revealedBlock(b)
+      }
+    })
+}
+
+function revealedMines() {
+  state.forEach((row) => {
+    row.forEach((block) => {
+      if (block.mine)
+        block.revealed = true
+    })
+  })
+  setTimeout(() => {
+    alert('GAME OVER')
+  })
 }
 
 const directions = [
@@ -63,26 +122,15 @@ const directions = [
   [-1, 1],
   [0, 1],
 ]
-
-function updateNums() {
-  state.forEach((row) => {
-    row.forEach((block) => {
-      if (block.mine)
-        return
-      for (const [dx, dy] of directions) {
-        const x2 = block.x + dx
-        const y2 = block.y + dy
-        if (x2 < 0 || x2 >= WIDTH || y2 < 0 || y2 >= HEIGHT)
-          continue
-        if (state[y2][x2].mine)
-          block.adjacentMines += 1
-      }
-    })
-  })
+function getSiblings(block: BlockState) {
+  return directions.map(([dx, dy]) => {
+    const x2 = block.x + dx
+    const y2 = block.y + dy
+    if (x2 < 0 || x2 >= WIDTH || y2 < 0 || y2 >= HEIGHT)
+      return undefined
+    return state[y2][x2]
+  }).filter(Boolean) as BlockState []
 }
-
-makerMines()
-updateNums()
 </script>
 
 <template>
@@ -90,7 +138,6 @@ updateNums()
     <button
       v-for="block of row" :key="block.x"
       w-10 h-10
-      hover="bg-gray/10"
       border="1 gray-400/10"
       :class="getBlockClass(block)"
       @click="onClick(block)"
