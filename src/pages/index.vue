@@ -46,6 +46,8 @@ const state = reactive(
 let makerMine = false
 
 function onClick(block: BlockState) {
+  if (block.flagged)
+    return
   if (!makerMine) {
     makerMines(block)
     updateNums()
@@ -54,6 +56,7 @@ function onClick(block: BlockState) {
 
   block.revealed = true
   revealedBlock(block)
+  checkGameState()
   if (block.mine)
     revealedMines()
 }
@@ -65,10 +68,6 @@ function makerMines(initial: BlockState) {
         continue
       if (Math.abs(initial.y - block.y) <= 1)
         continue
-
-      if (Math.abs(block.y - initial.y) <= 1)
-        continue
-
       block.mine = Math.random() < 0.3
     }
   }
@@ -91,13 +90,21 @@ function revealedBlock(block: BlockState) {
   if (block.adjacentMines)
     return
   getSiblings(block)
-    .filter(item => !item.adjacentMines)
+    // .filter(item => !item.adjacentMines)
     .forEach((b) => {
-      if (!b.revealed) {
+      if (!b.revealed && !b.flagged) {
         b.revealed = true
         revealedBlock(b)
       }
     })
+}
+
+function onRightClick(e: Event, block: BlockState) {
+  if (block.revealed)
+    return
+  block.flagged = !block.flagged
+  if (makerMine)
+    checkGameState()
 }
 
 function revealedMines() {
@@ -131,6 +138,16 @@ function getSiblings(block: BlockState) {
     return state[y2][x2]
   }).filter(Boolean) as BlockState []
 }
+
+function checkGameState() {
+  const blocks = state.flat()
+  if (blocks.filter(block => block.mine).every(b => b.flagged))
+    alert('You Win!')
+  if (blocks.every(block => block.revealed || block.flagged || block.mine)) {
+    if (blocks.some(block => !block.revealed && block.mine))
+      alert('You Win!')
+  }
+}
 </script>
 
 <template>
@@ -141,8 +158,12 @@ function getSiblings(block: BlockState) {
       border="1 gray-400/10"
       :class="getBlockClass(block)"
       @click="onClick(block)"
+      @contextmenu.prevent="onRightClick($event, block)"
     >
-      <template v-if="block.revealed">
+      <template v-if="block.flagged">
+        🚩
+      </template>
+      <template v-else-if="block.revealed || true">
         {{ block.mine ? '💣' : block.adjacentMines }}
       </template>
     </button>
