@@ -81,8 +81,15 @@ function onClick(block: BlockState) {
     revealedMine()
     return
   }
-
+  checkGameState()
   revealedSibling(block)
+}
+
+function onRightClick(block: BlockState) {
+  if (block.revealed)
+    return
+  block.flagged = !block.flagged
+  checkGameState()
 }
 
 function revealedMine() {
@@ -141,6 +148,18 @@ function changeDifficulty(level: string) {
   difficultyLevel = level
   state.value = initState(difficultyMap[difficultyLevel])
 }
+
+function checkGameState() {
+  const blocks = state.value.flat()
+
+  if (blocks.filter(block => block.mine).every(b => b.flagged))
+    alert('You Win!')
+
+  if (blocks.every(block => block.revealed || block.flagged || block.mine)) {
+    if (blocks.some(block => !block.revealed && block.mine))
+      alert('You Win!')
+  }
+}
 </script>
 
 <template>
@@ -161,8 +180,12 @@ function changeDifficulty(level: string) {
       border="1 gray-400/10"
       :class="getBlockClass(block)"
       @click="onClick(block)"
+      @contextmenu.prevent="onRightClick(block)"
     >
-      <template v-if="block.revealed">
+      <template v-if="block.flagged">
+        🚩
+      </template>
+      <template v-else-if="block.revealed">
         {{ block.mine ? '💣' : block.adjacentMines }}
       </template>
     </button>
