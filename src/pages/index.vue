@@ -70,7 +70,7 @@ watchEffect(() => {
       <template v-if="block.flagged">
         🚩
       </template>
-      <template v-else-if="block.revealed">
+      <template v-else-if="block.revealed || true">
         {{ block.mine ? '💣' : block.adjacentMines }}
       </template>
     </button>
