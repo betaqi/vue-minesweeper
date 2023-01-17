@@ -36,10 +36,8 @@ export class Game {
       }),
       ),
     )
-    nextTick(() => {
-      this.makerMines()
-      this.updateNums()
-    })
+    this.makerMines()
+    this.updateNums()
   }
 
   updateNums() {
@@ -123,7 +121,6 @@ export class Game {
 
   checkGameState() {
     const blocks = this.state.value.flat()
-
     if (blocks.filter(block => block.mine).every(b => b.flagged))
       alert('You Win!')
 
