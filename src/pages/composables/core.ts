@@ -17,6 +17,7 @@ export class Game {
   constructor(
     public width: number,
     public height: number,
+    public mines: number,
   ) {
     this.reset()
   }
@@ -24,9 +25,11 @@ export class Game {
   reset(
     width = this.width,
     height = this.height,
+    mines = this.mines,
   ) {
     this.width = width
     this.height = height
+    this.mines = mines
     this.state.value = Array.from({ length: this.height }, (_, y) =>
       Array.from({ length: this.width }, (_, x): BlockState => ({
         x,
@@ -36,7 +39,7 @@ export class Game {
       }),
       ),
     )
-    this.makerMines()
+    this.makerMines(this.state.value)
     this.updateNums()
   }
 
@@ -57,11 +60,28 @@ export class Game {
     })
   }
 
-  makerMines() {
-    for (const row of this.state.value) {
-      for (const block of row)
-        block.mine = Math.random() < 0.1
+  randomRange(min: number, max: number) {
+    return Math.round(Math.random() * (max - min) + min)
+  }
+
+  makerMines(state: BlockState[][]) {
+    const placeRandom = () => {
+      const x = this.randomRange(0, this.width - 1)
+      const y = this.randomRange(0, this.height - 1)
+      const block = state[y][x]
+      if (block.mine) {
+        return false
+      }
+      else {
+        block.mine = true
+        return true
+      }
     }
+    Array.from({ length: this.mines }).forEach(() => {
+      let place = false
+      while (!place)
+        place = placeRandom()
+    })
   }
 
   onClick(block: BlockState) {

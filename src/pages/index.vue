@@ -5,8 +5,10 @@ defineOptions({
   name: 'IndexPage',
 })
 const difficulty: Difficulty[] = ['easy', 'medium', 'hard']
-const game = new Game(12, 12)
+const game = new Game(12, 12, 10)
 const state = game.state
+const isDev = ref(false)
+const toggleDev = useToggle(isDev)
 
 const blockColors = [
   'text-transparent border-transparent',
@@ -21,19 +23,19 @@ const blockColors = [
 function getBlockClass(block: BlockState) {
   if (!block.revealed)
     return 'bg-gray-500/10 hover:bg-gray-500/20'
-  return block.mine ? 'text-red' : blockColors[block.adjacentMines]
+  return block.mine ? 'bg-red-500' : blockColors[block.adjacentMines]
 }
 
 function newGame(difficulty: 'easy' | 'medium' | 'hard') {
   switch (difficulty) {
     case 'easy':
-      game.reset(9, 9)
+      game.reset(9, 9, 10)
       break
     case 'medium':
-      game.reset(16, 16)
+      game.reset(16, 16, 18)
       break
     case 'hard':
-      game.reset(16, 30)
+      game.reset(16, 30, 24)
       break
   }
 }
@@ -43,7 +45,11 @@ watchEffect(() => {
 </script>
 
 <template>
+  Mine Count :{{ state.flat().filter(r => r.mine).length }}
   <div flex="~ gap1" justify-center p4>
+    <button btn @click="toggleDev()">
+      作弊模式{{ isDev }}
+    </button>
     <button btn @click="game.reset()">
       New Game
     </button>
@@ -70,7 +76,7 @@ watchEffect(() => {
       <template v-if="block.flagged">
         🚩
       </template>
-      <template v-else-if="block.revealed || true">
+      <template v-else-if="block.revealed || isDev">
         {{ block.mine ? '💣' : block.adjacentMines }}
       </template>
     </button>
