@@ -81,4 +81,5 @@ watchEffect(() => {
       </template>
     </button>
   </div>
+  <Confetti />
 </template>

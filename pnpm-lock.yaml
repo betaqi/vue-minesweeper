@@ -9,6 +9,7 @@ specifiers:
   '@vue-macros/volar': ^0.5.4
   '@vue/test-utils': ^2.2.6
   '@vueuse/core': ^9.6.0
+  canvas-confetti: ^1.6.0
   eslint: ^8.29.0
   jsdom: ^20.0.3
   pnpm: ^7.18.1
@@ -27,6 +28,7 @@ specifiers:
 
 dependencies:
   '@vueuse/core': 9.6.0_vue@3.2.45
+  canvas-confetti: 1.6.0
   vue: 3.2.45
   vue-router: 4.1.6_vue@3.2.45
 
@@ -1657,6 +1659,10 @@ packages:
     resolution: {integrity: sha512-P8BjAsXvZS+VIDUI11hHCQEv74YT67YUi5JJFNWIqL235sBmjX4+qx9Muvls5ivyNENctx46xQLQ3aTuE7ssaQ==}
     engines: {node: '>=6'}
     dev: true
+
+  /canvas-confetti/1.6.0:
+    resolution: {integrity: sha512-ej+w/m8Jzpv9Z7W7uJZer14Ke8P2ogsjg4ZMGIuq4iqUOqY2Jq8BNW42iGmNfRwREaaEfFIczLuZZiEVSYNHAA==}
+    dev: false
 
   /chai/4.3.6:
     resolution: {integrity: sha512-bbcp3YfHCUzMOvKqsztczerVgBKSsEijCySNlHHbX3VG1nskvqjz5Rfso1gGwD6w6oOV3eI60pKuMOV5MV7p3Q==}
