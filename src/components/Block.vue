@@ -15,7 +15,7 @@ const blockColors = [
 
 function getBlockClass(block: BlockState) {
   if (!block.revealed)
-    return 'bg-gray-600/10'
+    return 'bg-gray-500/10 hover:bg-gray-500/20'
 
   return block.mine ? 'text-red' : blockColors[block.adjacentMines]
 }
@@ -30,8 +30,8 @@ function getBlockClass(block: BlockState) {
     <template v-if="block.flagged">
       🚩
     </template>
-    <template v-else-if="block.revealed">
-      {{ block.mine ? '💣' : block.adjacentMines }}
+    <template v-else-if="block.revealed || true">
+      {{ block.mine ? '💣' : block.adjacentMines || '' }}
     </template>
   </button>
 </template>

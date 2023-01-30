@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { GamePlay } from './core'
 
-const play = new GamePlay(10, 10)
+const play = new GamePlay(10, 10, 10)
 const stast = play.state
 
 defineOptions({
@@ -15,7 +15,7 @@ defineOptions({
       v-for="block of row" :key="block.x"
       :block="block"
       @click="play.onClick(block)"
-      @contextmenu.prevent="play.onRightClick($event, block)"
+      @contextmenu.prevent="play.onRightClick(block)"
     />
   </div>
 </template>

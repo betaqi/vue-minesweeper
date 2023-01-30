@@ -23,13 +23,15 @@ export class GamePlay {
   constructor(
     public width: number,
     public height: number,
+    public mine: number,
   ) {
-    this.reset(width, height)
+    this.reset(width, height, mine)
   }
 
-  reset(width: number, height: number) {
+  reset(width: number, height: number, mine: number) {
     this.width = width
     this.height = height
+    this.mine = mine
     this.state.value = {
       status: 'pending',
       data: Array.from({ length: this.width }, (_, y) =>
@@ -47,6 +49,7 @@ export class GamePlay {
     if (block.flagged)
       return
     if (this.state.value.status === 'pending') {
+      console.log(this.state.value.status)
       this.makerMines(block)
       this.updateNums()
       this.state.value.status = 'playing'
@@ -59,14 +62,28 @@ export class GamePlay {
       this.revealedMines()
   }
 
+  randomCount(min: number, max: number) {
+    return Math.round(Math.random() * (max - min) + min)
+  }
+
   makerMines(initial: BlockState) {
-    for (const row of this.state.value.data) {
-      for (const block of row) {
-        if (Math.abs(initial.x - block.x) <= 1 && Math.abs(initial.y - block.y) <= 1)
-          continue
-        block.mine = Math.random() < 0.3
-      }
+    const placeRandom = () => {
+      const x = this.randomCount(0, this.width - 1)
+      const y = this.randomCount(0, this.height - 1)
+      const block = this.state.value.data[y][x]
+      if ((Math.abs(initial.x - block.x) <= 1 && Math.abs(initial.y - block.y) <= 1))
+        return false
+      if (block.mine)
+        return false
+      block.mine = true
+      return true
     }
+
+    Array.from({ length: this.mine }).forEach((_) => {
+      let place = false
+      while (!place)
+        place = placeRandom()
+    })
   }
 
   updateNums() {
@@ -95,8 +112,8 @@ export class GamePlay {
       })
   }
 
-  onRightClick(e: Event, block: BlockState) {
-    if (block.revealed)
+  onRightClick(block: BlockState) {
+    if (block.revealed || this.state.value.status === 'pending')
       return
     block.flagged = !block.flagged
     if (this.state.value.status === 'playing')
