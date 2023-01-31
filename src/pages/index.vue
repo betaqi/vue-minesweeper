@@ -2,7 +2,7 @@
 import { GamePlay } from './core'
 
 const play = new GamePlay(5, 5, 3)
-const stast = play.state
+const state = play.state
 
 watchEffect(() => {
   play.checkGameState()
@@ -14,7 +14,7 @@ defineOptions({
 </script>
 
 <template>
-  <div v-for="(row, y) of stast.data" :key="y" flex="~" justify-center>
+  <div v-for="(row, y) of state.data" :key="y" flex="~" justify-center>
     <Block
       v-for="block of row" :key="block.x"
       :block="block"
@@ -22,4 +22,5 @@ defineOptions({
       @contextmenu.prevent="play.onRightClick(block)"
     />
   </div>
+  <Confetti :passed="state.status === 'resove'" />
 </template>

@@ -83,8 +83,13 @@ export class GamePlay {
   }
 
   onClick(block: BlockState) {
-    if (block.flagged)
+    if (
+      block.flagged
+      || this.state.value.status === 'reject'
+      || this.state.value.status === 'resove'
+    )
       return
+
     if (this.state.value.status === 'pending') {
       this.makerMines(block)
       this.updateNums()
@@ -92,10 +97,13 @@ export class GamePlay {
     }
 
     block.revealed = true
-    this.revealedBlock(block)
     // this.checkGameState()
-    if (block.mine)
+    if (block.mine) {
       this.state.value.status = 'reject'
+      return
+    }
+
+    this.revealedSibling(block)
   }
 
   onRightClick(block: BlockState) {
@@ -103,7 +111,7 @@ export class GamePlay {
       block.flagged = !block.flagged
   }
 
-  revealedBlock(block: BlockState) {
+  revealedSibling(block: BlockState) {
     if (block.adjacentMines)
       return
     this.getSiblings(block)
@@ -111,7 +119,7 @@ export class GamePlay {
       .forEach((b) => {
         if (!b.revealed && !b.flagged) {
           b.revealed = true
-          this.revealedBlock(b)
+          this.revealedSibling(b)
         }
       })
   }
@@ -136,13 +144,13 @@ export class GamePlay {
     const blocks = this.state.value.data.flat()
     if (
       blocks.filter(blocks => !blocks.mine).every(b => b.revealed)
-        && blocks.filter(block => block.mine).every(b => b.flagged)
+      && blocks.filter(block => block.mine).every(b => b.flagged)
     )
       this.state.value.status = 'resove'
     if (blocks.every(block => block.revealed || block.flagged || block.mine)) {
       if (
         blocks.some(block => !block.revealed && block.mine)
-         && blocks.filter(blocks => !blocks.mine).every(b => b.revealed)
+        && blocks.filter(blocks => !blocks.mine).every(b => b.revealed)
       )
         this.state.value.status = 'resove'
     }
