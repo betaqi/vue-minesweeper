@@ -1,8 +1,12 @@
 <script setup lang="ts">
 import { GamePlay } from './core'
 
-const play = new GamePlay(10, 10, 10)
+const play = new GamePlay(5, 5, 3)
 const stast = play.state
+
+watchEffect(() => {
+  play.checkGameState()
+})
 
 defineOptions({
   name: 'IndexPage',

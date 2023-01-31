@@ -30,7 +30,7 @@ function getBlockClass(block: BlockState) {
     <template v-if="block.flagged">
       🚩
     </template>
-    <template v-else-if="block.revealed || true">
+    <template v-else-if="block.revealed">
       {{ block.mine ? '💣' : block.adjacentMines || '' }}
     </template>
   </button>

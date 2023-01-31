@@ -45,23 +45,6 @@ export class GamePlay {
     }
   }
 
-  onClick(block: BlockState) {
-    if (block.flagged)
-      return
-    if (this.state.value.status === 'pending') {
-      console.log(this.state.value.status)
-      this.makerMines(block)
-      this.updateNums()
-      this.state.value.status = 'playing'
-    }
-
-    block.revealed = true
-    this.revealedBlock(block)
-    this.checkGameState()
-    if (block.mine)
-      this.revealedMines()
-  }
-
   randomCount(min: number, max: number) {
     return Math.round(Math.random() * (max - min) + min)
   }
@@ -99,6 +82,27 @@ export class GamePlay {
     })
   }
 
+  onClick(block: BlockState) {
+    if (block.flagged)
+      return
+    if (this.state.value.status === 'pending') {
+      this.makerMines(block)
+      this.updateNums()
+      this.state.value.status = 'playing'
+    }
+
+    block.revealed = true
+    this.revealedBlock(block)
+    // this.checkGameState()
+    if (block.mine)
+      this.state.value.status = 'reject'
+  }
+
+  onRightClick(block: BlockState) {
+    if (!block.revealed && this.state.value.status === 'playing')
+      block.flagged = !block.flagged
+  }
+
   revealedBlock(block: BlockState) {
     if (block.adjacentMines)
       return
@@ -112,26 +116,6 @@ export class GamePlay {
       })
   }
 
-  onRightClick(block: BlockState) {
-    if (block.revealed || this.state.value.status === 'pending')
-      return
-    block.flagged = !block.flagged
-    if (this.state.value.status === 'playing')
-      this.checkGameState()
-  }
-
-  revealedMines() {
-    this.state.value.data.forEach((row) => {
-      row.forEach((block) => {
-        if (block.mine)
-          block.revealed = true
-      })
-    })
-    setTimeout(() => {
-      alert('GAME OVER')
-    })
-  }
-
   getSiblings(block: BlockState) {
     return directions.map(([dx, dy]) => {
       const x2 = block.x + dx
@@ -143,12 +127,33 @@ export class GamePlay {
   }
 
   checkGameState() {
-    const blocks = this.state.value.data.flat()
-    if (blocks.filter(block => block.mine).every(b => b.flagged))
-      alert('You Win!')
-    if (blocks.every(block => block.revealed || block.flagged || block.mine)) {
-      if (blocks.some(block => !block.revealed && block.mine))
-        alert('You Win!')
+    if (this.state.value.status === 'pending')
+      return
+    if (this.state.value.status === 'reject') {
+      this.revealedMines()
+      return
     }
+    const blocks = this.state.value.data.flat()
+    if (
+      blocks.filter(blocks => !blocks.mine).every(b => b.revealed)
+        && blocks.filter(block => block.mine).every(b => b.flagged)
+    )
+      this.state.value.status = 'resove'
+    if (blocks.every(block => block.revealed || block.flagged || block.mine)) {
+      if (
+        blocks.some(block => !block.revealed && block.mine)
+         && blocks.filter(blocks => !blocks.mine).every(b => b.revealed)
+      )
+        this.state.value.status = 'resove'
+    }
+  }
+
+  revealedMines() {
+    this.state.value.data.forEach((row) => {
+      row.forEach((block) => {
+        if (block.mine)
+          block.revealed = true
+      })
+    })
   }
 }
