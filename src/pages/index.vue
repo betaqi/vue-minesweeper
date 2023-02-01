@@ -41,5 +41,6 @@ const time = computed(() => {
       @contextmenu.prevent="play.onRightClick(block)"
     />
   </div>
+  Bomb Count：{{ state.data.flat().filter(r => r.mine).length }}
   <Confetti :passed="state.status === 'resove'" />
 </template>
