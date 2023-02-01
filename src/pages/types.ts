@@ -7,3 +7,5 @@ export interface BlockState {
   revealed: boolean // 翻开
   adjacentMines: number // 相邻的地雷
 }
+
+export type Difficulty = 'easy' | 'medium' | 'hard'

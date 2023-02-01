@@ -15,6 +15,8 @@ const directions = [
 interface GameState {
   data: BlockState[][]
   status: GameStatus
+  startMS?: number
+  endMS?: number
 }
 
 export class GamePlay {
@@ -28,14 +30,14 @@ export class GamePlay {
     this.reset(width, height, mine)
   }
 
-  reset(width: number, height: number, mine: number) {
+  reset(width = this.width, height = this.height, mine = this.mine) {
     this.width = width
     this.height = height
     this.mine = mine
     this.state.value = {
       status: 'pending',
-      data: Array.from({ length: this.width }, (_, y) =>
-        Array.from({ length: this.height }, (_, x) => ({
+      data: Array.from({ length: this.height }, (_, y) =>
+        Array.from({ length: this.width }, (_, x) => ({
           x,
           y,
           adjacentMines: 0,
@@ -67,6 +69,7 @@ export class GamePlay {
       while (!place)
         place = placeRandom()
     })
+    this.updateNums()
   }
 
   updateNums() {
@@ -92,14 +95,14 @@ export class GamePlay {
 
     if (this.state.value.status === 'pending') {
       this.makerMines(block)
-      this.updateNums()
-      this.state.value.status = 'playing'
+      this.gameOver('playing')
+      this.state.value.startMS = +new Date()
     }
 
     block.revealed = true
     // this.checkGameState()
     if (block.mine) {
-      this.state.value.status = 'reject'
+      this.gameOver('reject')
       return
     }
 
@@ -137,22 +140,18 @@ export class GamePlay {
   checkGameState() {
     if (this.state.value.status === 'pending')
       return
-    if (this.state.value.status === 'reject') {
-      this.revealedMines()
-      return
-    }
     const blocks = this.state.value.data.flat()
     if (
       blocks.filter(blocks => !blocks.mine).every(b => b.revealed)
       && blocks.filter(block => block.mine).every(b => b.flagged)
     )
-      this.state.value.status = 'resove'
+      this.gameOver('resove')
     if (blocks.every(block => block.revealed || block.flagged || block.mine)) {
       if (
         blocks.some(block => !block.revealed && block.mine)
         && blocks.filter(blocks => !blocks.mine).every(b => b.revealed)
       )
-        this.state.value.status = 'resove'
+        this.gameOver('resove')
     }
   }
 
@@ -163,5 +162,13 @@ export class GamePlay {
           block.revealed = true
       })
     })
+  }
+
+  gameOver(status: GameStatus) {
+    this.state.value.status = status
+    if (status === 'reject' || status === 'resove')
+      this.state.value.endMS = +Date.now()
+    if (status === 'reject')
+      this.revealedMines()
   }
 }

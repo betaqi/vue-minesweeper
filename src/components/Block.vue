@@ -1,6 +1,6 @@
 <script setup  lang="ts">
 import type { BlockState } from '../pages/types'
-defineProps<{ block: BlockState }>()
+defineProps<{ block: BlockState; isDev: Boolean }>()
 
 const blockColors = [
   'text-transparent border-transparent',
@@ -30,7 +30,7 @@ function getBlockClass(block: BlockState) {
     <template v-if="block.flagged">
       🚩
     </template>
-    <template v-else-if="block.revealed || true">
+    <template v-else-if="block.revealed || isDev">
       {{ block.mine ? '💣' : block.adjacentMines || '' }}
     </template>
   </button>
