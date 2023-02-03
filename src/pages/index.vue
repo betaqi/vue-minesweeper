@@ -48,6 +48,7 @@ const time = computed(() => {
       :is-dev="isDev"
       @click="play.onClick(block)"
       @contextmenu.prevent="play.onRightClick(block)"
+      @dblclick="play.autoExpand(block)"
     />
   </div>
   Bomb Count：{{ state.data.flat().filter(r => r.mine).length }}

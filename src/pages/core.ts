@@ -172,4 +172,16 @@ export class GamePlay {
     if (status === 'reject')
       this.revealedMines()
   }
+
+  autoExpand(block: BlockState) {
+    const siblings = this.getSiblings(block)
+    const flaggedCount = siblings.reduce((pre, curr) => pre + (curr.flagged ? 1 : 0), 0)
+    if (flaggedCount === block.adjacentMines) {
+      siblings.filter(block => !block.revealed && !block.flagged).forEach((r) => {
+        r.revealed = true
+        if (r.mine)
+          this.gameOver('reject')
+      })
+    }
+  }
 }
