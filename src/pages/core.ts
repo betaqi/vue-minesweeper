@@ -96,7 +96,7 @@ export class GamePlay {
     if (this.state.value.status === 'pending') {
       this.makerMines(block)
       this.gameOver('playing')
-      this.state.value.startMS = +new Date()
+      this.state.value.startMS = Date.now()
     }
 
     block.revealed = true
@@ -168,7 +168,7 @@ export class GamePlay {
   gameOver(status: GameStatus) {
     this.state.value.status = status
     if (status === 'reject' || status === 'resove')
-      this.state.value.endMS = +Date.now()
+      this.state.value.endMS = Date.now()
     if (status === 'reject')
       this.revealedMines()
   }
