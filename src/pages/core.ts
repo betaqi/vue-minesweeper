@@ -139,7 +139,7 @@ export class GamePlay {
 
   checkGameState() {
     if (this.state.value.status === 'pending')
-      return
+      return 'pending'
     const blocks = this.state.value.data.flat()
     if (
       blocks.filter(blocks => !blocks.mine).every(b => b.revealed)
@@ -153,6 +153,7 @@ export class GamePlay {
       )
         this.gameOver('resove')
     }
+    return this.state.value.status
   }
 
   revealedMines() {

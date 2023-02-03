@@ -1,14 +1,23 @@
 <script setup lang="ts">
 import { GamePlay } from './core'
-import { IntervalTime, difficulty, isDev, newGame, toggleDev } from './util'
+import { difficulty, isDev, newGame, toggleDev } from './util'
 defineOptions({
   name: 'IndexPage',
 })
 
+const IntervalTime = ref(Date.now())
 const play = new GamePlay(16, 16, 18)
 const state = play.state
 watchEffect(() => {
-  play.checkGameState()
+  let inertval
+  if (play.checkGameState() === 'playing') {
+    IntervalTime.value = Date.now()
+    inertval = setInterval(() => {
+      IntervalTime.value = Date.now()
+    }, 1000)
+  }
+  if (play.checkGameState() === 'reject' || play.checkGameState() === 'resove')
+    clearInterval(inertval)
 })
 
 const time = computed(() => {
